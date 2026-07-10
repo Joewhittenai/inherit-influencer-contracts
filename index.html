@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inherit — Influencer Contract Generator</title>
+<style>
+  :root{
+    --navy:#1f3864; --navy2:#2e4a7a; --bg:#f4f6fa; --card:#ffffff;
+    --border:#d9dfea; --muted:#7a8199; --accent:#3a5bd9; --accent-soft:#eaefff;
+    --text:#1c2333;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.5}
+  header.appbar{background:var(--navy);color:#fff;padding:16px 24px;display:flex;align-items:center;
+    justify-content:space-between;flex-wrap:wrap;gap:12px}
+  header.appbar h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
+  header.appbar .sub{font-size:12px;color:#b9c4de}
+  .layout{display:grid;grid-template-columns:minmax(340px,420px) 1fr;gap:0;align-items:start}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}}
+  .panel{padding:20px 24px;max-height:calc(100vh - 58px);overflow:auto}
+  .form-panel{background:var(--card);border-right:1px solid var(--border)}
+  .preview-panel{background:var(--bg)}
+  .seg{display:flex;background:var(--accent-soft);border-radius:10px;padding:4px;margin-bottom:18px}
+  .seg button{flex:1;border:0;background:transparent;padding:9px 8px;border-radius:7px;font-weight:600;
+    font-size:13px;color:var(--navy2);cursor:pointer}
+  .seg button.active{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  fieldset{border:1px solid var(--border);border-radius:10px;margin:0 0 16px;padding:12px 14px 4px}
+  legend{font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;padding:0 6px}
+  label.f{display:block;margin:0 0 12px}
+  label.f .lab{display:block;font-size:12px;font-weight:600;color:#3a4256;margin-bottom:4px}
+  input[type=text],input[type=date],input[type=number],select,textarea{
+    width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;
+    font-family:inherit;background:#fff;color:var(--text)}
+  textarea{resize:vertical;min-height:52px}
+  select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%237a8199' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;cursor:pointer}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .chk{display:flex;flex-wrap:wrap;gap:8px}
+  .chk label{display:flex;align-items:center;gap:6px;font-size:13px;background:#fff;border:1px solid var(--border);
+    padding:6px 10px;border-radius:20px;cursor:pointer}
+  .chk input{accent-color:var(--accent)}
+  .actions{display:flex;gap:10px;position:sticky;bottom:0;background:var(--card);padding:14px 0 6px;margin-top:6px}
+  .btn{flex:1;border:0;border-radius:9px;padding:11px;font-size:14px;font-weight:700;cursor:pointer}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-ghost{background:#eef1f7;color:var(--navy)}
+  .hint{font-size:11px;color:var(--muted);margin:-6px 0 12px}
+  /* preview / contract */
+  .paper{background:#fff;max-width:760px;margin:0 auto;padding:56px 64px;border-radius:6px;
+    box-shadow:0 3px 18px rgba(20,30,60,.10);font-size:13.5px;color:#1c2333}
+  .paper h2.title{text-align:center;color:var(--navy);font-size:22px;margin:0 0 2px}
+  .paper .ptype{text-align:center;color:var(--muted);font-weight:700;font-size:12px;letter-spacing:1px;
+    text-transform:uppercase;margin:0 0 22px}
+  .paper h3{color:var(--navy);font-size:15px;margin:22px 0 8px;border-bottom:1px solid #e6e9f2;padding-bottom:4px}
+  .paper ol{padding-left:20px;margin:0}
+  .paper ol li{margin:0 0 11px}
+  .paper ol li b{color:#1c2333}
+  .paper p{margin:0 0 11px}
+  .val{color:#12408a;font-weight:600}
+  .val.empty{color:#b03a5b;font-weight:600;font-style:italic}
+  table.ex{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:12.5px}
+  table.ex td{border:1px solid #cfd6e6;padding:7px 9px;vertical-align:top}
+  table.ex td.k{background:#eef2fb;font-weight:600;width:38%;color:#26324d}
+  .sigrow{display:flex;gap:40px;margin-top:14px;flex-wrap:wrap}
+  .sigrow .sig{flex:1;min-width:220px}
+  .sigline{border-bottom:1px solid #333;height:26px;margin-bottom:3px}
+  .sigcap{font-size:11px;color:var(--muted)}
+  .note{font-size:11px;color:var(--muted);font-style:italic}
+  @media print{
+    body{background:#fff}
+    header.appbar,.form-panel,.actions,.no-print{display:none!important}
+    .layout{display:block}
+    .preview-panel{padding:0;max-height:none;overflow:visible}
+    .panel{max-height:none;overflow:visible;padding:0}
+    .paper{box-shadow:none;max-width:none;margin:0;padding:0;border-radius:0}
+    .paper h3{page-break-after:avoid}
+    .paper ol li,table.ex tr{page-break-inside:avoid}
+    @page{size:letter;margin:0.9in}
+  }
+</style>
+</head>
+<body>
+<header class="appbar">
+  <div><h1>Inherit — Influencer Contract Generator</h1>
+    <div class="sub">Inherit, LLC · pick the terms, preview updates live, then Save as PDF</div></div>
+  <div class="sub no-print">Governing law: New Hampshire</div>
+</header>
+
+<div class="layout">
+  <!-- ============ FORM ============ -->
+  <div class="panel form-panel">
+    <div class="seg" id="typeSeg">
+      <button data-type="paid" class="active">💵 Paid</button>
+      <button data-type="gifted">🎁 Gifted (product-in-kind)</button>
+    </div>
+
+    <fieldset>
+      <legend>Parties</legend>
+      <label class="f"><span class="lab">Inherit, LLC address</span><input type="text" id="coAddr" placeholder="Street, City, ST ZIP"></label>
+      <label class="f"><span class="lab">Effective date</span><input type="date" id="effDate"></label>
+      <label class="f"><span class="lab">Influencer legal name</span><input type="text" id="infName" placeholder="Jane Doe"></label>
+      <label class="f"><span class="lab">Influencer handle</span><input type="text" id="infHandle" placeholder="@janedoe"></label>
+      <label class="f"><span class="lab">Influencer address</span><input type="text" id="infAddr" placeholder="Street, City, ST ZIP"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Campaign</legend>
+      <label class="f"><span class="lab">Campaign / product name</span><input type="text" id="campaign" placeholder="Inherit Fall drop"></label>
+      <label class="f"><span class="lab">Platforms</span>
+        <div class="chk" id="platforms">
+          <label><input type="checkbox" value="Instagram" checked>Instagram</label>
+          <label><input type="checkbox" value="TikTok" checked>TikTok</label>
+          <label><input type="checkbox" value="YouTube">YouTube</label>
+          <label><input type="checkbox" value="Facebook">Facebook</label>
+          <label><input type="checkbox" value="X (Twitter)">X</label>
+          <label><input type="checkbox" value="a blog">Blog</label>
+        </div>
+      </label>
+      <label class="f"><span class="lab">Deliverables (quantity &amp; format)</span>
+        <textarea id="deliverables" placeholder="2 Instagram Reels + 3 Stories + 1 TikTok"></textarea></label>
+      <label class="f"><span class="lab">Minimum length / duration</span>
+        <input type="text" id="minLen" placeholder="Reels ≥ 20 sec; Stories ≥ 3 frames"></label>
+      <label class="f"><span class="lab">Required @-handles to tag</span>
+        <input type="text" id="tagHandles" value="@inherit, @apparelimpact"></label>
+      <label class="f"><span class="lab">Required hashtags / campaign tags</span>
+        <input type="text" id="hashtags" placeholder="#ad #Inherit #InheritPartner"></label>
+      <label class="f"><span class="lab">Required link / CTA</span>
+        <input type="text" id="cta" placeholder="link in bio to inherit.com/fall"></label>
+      <label class="f"><span class="lab">Caption / messaging requirements</span>
+        <textarea id="caption" placeholder="Mention the resale & textile-recovery mission; no competitor tags"></textarea></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Timing &amp; approvals</legend>
+      <label class="f"><span class="lab">Posting window / dates</span>
+        <input type="text" id="postWindow" placeholder="Publish between Sep 1 and Sep 30, 2026"></label>
+      <label class="f"><span class="lab">Campaign period</span>
+        <input type="text" id="campPeriod" placeholder="Sep 1 – Oct 15, 2026"></label>
+      <label class="f"><span class="lab">Approval lead time (business days before posting)</span>
+        <select id="approvalDays">
+          <option>2</option><option selected>3</option><option>5</option><option>7</option><option>0 (no pre-approval)</option>
+        </select></label>
+      <label class="f"><span class="lab">Cure period for breach (days)</span>
+        <select id="cureDays"><option>5</option><option selected>10</option><option>15</option><option>30</option></select></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Rights &amp; exclusivity</legend>
+      <label class="f"><span class="lab">Content usage rights</span>
+        <select id="usage">
+          <option value="full" selected>Full repurposing incl. paid ads (perpetual)</option>
+          <option value="organic">Organic repost only (no paid ads)</option>
+          <option value="timebox">Full rights, time-limited</option>
+        </select></label>
+      <label class="f" id="usageMonthsWrap" style="display:none"><span class="lab">Rights duration (months)</span>
+        <select id="usageMonths"><option>6</option><option selected>12</option><option>18</option><option>24</option></select></label>
+      <label class="f"><span class="lab">Exclusivity</span>
+        <select id="exclusivity">
+          <option value="none" selected>None</option>
+          <option value="apparel">No competing apparel / resale / textile brands during campaign</option>
+          <option value="named">No specific named competitors (list below)</option>
+        </select></label>
+      <label class="f" id="exNamedWrap" style="display:none"><span class="lab">Named competitors</span>
+        <input type="text" id="exNamed" placeholder="Brand A, Brand B"></label>
+    </fieldset>
+
+    <!-- PAID ONLY -->
+    <fieldset id="paidFields">
+      <legend>Compensation (paid)</legend>
+      <label class="f"><span class="lab">Fee (USD)</span><input type="text" id="fee" placeholder="1,500"></label>
+      <label class="f"><span class="lab">Payment schedule</span>
+        <select id="paySchedule">
+          <option value="split">50% on signing, 50% on completion</option>
+          <option value="net15" selected>100% net-15 days after final post is verified</option>
+          <option value="net30">100% net-30 days after final post is verified</option>
+          <option value="upfront">100% on signing</option>
+        </select></label>
+    </fieldset>
+
+    <!-- GIFTED ONLY -->
+    <fieldset id="giftedFields" style="display:none">
+      <legend>Products (gifted)</legend>
+      <label class="f"><span class="lab">Product(s) provided</span>
+        <textarea id="products" placeholder="1x Reworked Denim Jacket (M), 1x Organic Tee (S/white)"></textarea></label>
+      <label class="f"><span class="lab">Approx. aggregate retail value (USD)</span>
+        <input type="text" id="retail" placeholder="240"></label>
+      <label class="f"><span class="lab">Ownership of products</span>
+        <select id="ownership">
+          <option value="keep" selected>Keep — influencer keeps the pieces</option>
+          <option value="return">Return after campaign</option>
+        </select></label>
+      <label class="f" id="returnDaysWrap" style="display:none"><span class="lab">Return within (days after campaign)</span>
+        <select id="returnDays"><option>7</option><option selected>14</option><option>30</option></select></label>
+      <label class="f"><span class="lab">Product-display requirement</span>
+        <input type="text" id="displayReq" placeholder="Pieces must be worn / shown on-camera"></label>
+    </fieldset>
+
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="window.print()">Save as PDF</button>
+      <button class="btn btn-primary" onclick="copyText()">Copy text</button>
+    </div>
+    <div class="hint" style="text-align:center">Use your browser's “Save as PDF” in the print dialog. Values shown in <span style="color:#b03a5b">red</span> still need filling.</div>
+  </div>
+
+  <!-- ============ PREVIEW ============ -->
+  <div class="panel preview-panel">
+    <div class="paper" id="contract"></div>
+  </div>
+</div>
+
+<script>
+const S = {}; // state
+let CTYPE = 'paid';
+
+function v(id){const e=document.getElementById(id);return e?e.value.trim():''}
+function show(id,val){const wrap=document.getElementById(id);if(wrap)wrap.style.display=val?'block':'none'}
+
+// pretty print a value or a red placeholder
+function val(text, placeholder){
+  if(text && text.length) return '<span class="val">'+esc(text)+'</span>';
+  return '<span class="val empty">['+placeholder+']</span>';
+}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+function platformsText(){
+  const arr=[...document.querySelectorAll('#platforms input:checked')].map(c=>c.value);
+  if(!arr.length) return '';
+  if(arr.length===1) return arr[0];
+  return arr.slice(0,-1).join(', ')+' and '+arr.slice(-1);
+}
+function usageText(){
+  const u=v('usage');
+  if(u==='organic') return 'a worldwide, royalty-free, sublicensable license to use, reproduce, edit, adapt, and display the Deliverables and the Influencer’s name, handle, and likeness contained in them on the Brand’s own organic social channels, website, and email. This license does NOT include paid advertising. ';
+  if(u==='timebox'){const m=v('usageMonths');return 'a worldwide, royalty-free, sublicensable license to use, reproduce, edit, adapt, display, and distribute the Deliverables and the Influencer’s name, handle, and likeness across all media, including paid advertising, for a period of <span class="val">'+m+' months</span> from first publication. ';}
+  return 'a worldwide, perpetual, irrevocable, royalty-free, fully sublicensable license to use, reproduce, edit, adapt, display, and distribute the Deliverables and the Influencer’s name, handle, likeness, and voice contained in them across all media now known or later developed, including organic social posts, the Brand’s website, email, and paid advertising on any platform. ';
+}
+function exclusivityText(){
+  const e=v('exclusivity');
+  if(e==='apparel') return 'During the Campaign Period the Influencer will not create or publish paid or gifted content promoting any competing apparel, clothing-resale, or textile-recycling brand.';
+  if(e==='named'){return 'During the Campaign Period the Influencer will not create or publish paid or gifted content promoting the following competitors: '+val(v('exNamed'),'named competitors')+'.';}
+  return 'No exclusivity applies to this engagement; the Influencer may work with other brands.';
+}
+function payText(){
+  const p=v('paySchedule');
+  const map={split:'50% on signing and 50% within 15 days after the final Deliverable is published and verified',
+    net15:'in full within 15 days after the final Deliverable is published and verified',
+    net30:'in full within 30 days after the final Deliverable is published and verified',
+    upfront:'in full on signing of this Agreement'};
+  return map[p]||map.net15;
+}
+
+function render(){
+  const c=document.getElementById('contract');
+  const isPaid = CTYPE==='paid';
+  const cure=v('cureDays'), appr=v('approvalDays');
+  const apprText = appr.startsWith('0') ? 'The Brand may review each Deliverable but pre-approval is not required.' :
+     'The Influencer will submit each Deliverable to the Brand for review at least <span class="val">'+appr+'</span> business days before publication. The Brand may request reasonable revisions and will not unreasonably withhold or delay approval.';
+
+  // consideration clause differs by type
+  let considerationLI;
+  if(isPaid){
+    considerationLI = '<li><b>Compensation.</b> In consideration for the Deliverables, the Brand will pay the Influencer '
+      + val(v('fee')?'$'+v('fee'):'', 'fee amount')
+      + ' USD, payable ' + payText() + '. Payment is contingent on the Influencer completing the Deliverables in compliance with this Agreement. The Influencer is responsible for any taxes on the fee.</li>';
+  } else {
+    const own=v('ownership');
+    let ownText = own==='return'
+      ? 'The Products are provided on loan solely to create the Deliverables and must be returned in good condition within <span class="val">'+v('returnDays')+'</span> days after the Campaign Period, at the Brand’s expense.'
+      : 'The Products are provided as a gift and the Influencer may keep them following completion of the Deliverables.';
+    considerationLI = '<li><b>Products &amp; Consideration.</b> The Brand will provide the Influencer with the following Inherit product(s) as the sole consideration for the Deliverables: '
+      + val(v('products'),'product list')
+      + ', having an approximate aggregate retail value of ' + val(v('retail')?'$'+v('retail'):'', 'retail value') + ' USD. '
+      + ownText
+      + ' If the Influencer fails to complete the Deliverables, the Brand may require return of the Products or payment of their retail value. The Influencer is responsible for any taxes arising from receipt of the Products.</li>';
+  }
+
+  const displayLI = (!isPaid && v('displayReq'))
+    ? '<li><b>Product Display.</b> '+val(v('displayReq'),'display requirement')+'</li>' : '';
+
+  c.innerHTML = `
+    <h2 class="title">${isPaid?'Influencer Services Agreement':'Influencer Gifting Agreement'}</h2>
+    <div class="ptype">${isPaid?'Paid Engagement':'Product-in-Kind Engagement'}</div>
+
+    <p>This Influencer Agreement (the “Agreement”) is entered into as of ${val(fmtDate(v('effDate')),'effective date')} by and between
+    <b>Inherit, LLC</b>, a limited liability company with its principal place of business at ${val(v('coAddr'),'Inherit, LLC address')}
+    (the “Brand” or “Company”), and
+    ${val(v('infName'),'influencer name')} (${val(v('infHandle'),'handle')}), ${val(v('infAddr'),'address')} (the “Influencer”).
+    ${isPaid?'The Brand will pay the Influencer the fee below in exchange for the Influencer’s content and promotional services.'
+            :'The Brand will provide the Influencer with the products below at no cost in exchange for the content and promotional services described below.'}
+    Each is a “Party.”</p>
+
+    <h3>Terms</h3>
+    <ol>
+      <li><b>Engagement.</b> The Brand engages the Influencer to create and publish content promoting the Inherit brand for the
+      ${val(v('campaign'),'campaign name')} campaign on ${val(platformsText(),'platforms')}, on the terms of this Agreement.</li>
+
+      ${considerationLI}
+
+      <li><b>Deliverables.</b> The Influencer will create and publish: ${val(v('deliverables'),'deliverables')}.
+      Minimum length / duration: ${val(v('minLen'),'min length')}.
+      The Influencer will tag ${val(v('tagHandles'),'@-handles')} and include the hashtags/campaign tags
+      ${val(v('hashtags'),'hashtags')}. Required link / call-to-action: ${val(v('cta'),'link / CTA')}.
+      Caption &amp; messaging requirements: ${val(v('caption'),'caption requirements')}.</li>
+
+      ${displayLI}
+
+      <li><b>Posting Schedule.</b> The Influencer will publish the Deliverables during: ${val(v('postWindow'),'posting window')}.
+      The Campaign Period is ${val(v('campPeriod'),'campaign period')}.</li>
+
+      <li><b>FTC Disclosure &amp; Compliance.</b> The Influencer will clearly and conspicuously disclose the material connection
+      with the Brand on every Deliverable in accordance with the U.S. FTC Endorsement Guides and platform policies (e.g., “#ad,”
+      “#sponsored,” or a built-in paid-partnership label, visible without clicking “more”). All statements about Inherit must be
+      truthful and reflect the Influencer’s honest experience.</li>
+
+      <li><b>Content Approval.</b> ${apprText}</li>
+
+      <li><b>License &amp; Content Usage Rights.</b> The Influencer grants the Brand ${usageText()}The Brand will credit the
+      Influencer’s handle where reasonably practicable.${v('usage')==='timebox'?'':' This license survives termination.'}</li>
+
+      <li><b>Exclusivity.</b> ${exclusivityText()}</li>
+
+      <li><b>Brand Safety &amp; Conduct.</b> The Influencer will not publish content that is unlawful, defamatory, discriminatory,
+      sexually explicit, hateful, or that disparages the Brand. The Brand may require prompt removal or amendment of any
+      non-compliant Deliverable and may terminate immediately for conduct that materially harms the Brand’s reputation.</li>
+
+      <li><b>Ownership &amp; IP Warranty.</b> The Influencer warrants the Deliverables are original, that the Influencer has all
+      rights needed to grant the license above, and that they infringe no third-party rights (including music and images). The
+      Brand’s trademarks, logos, and product designs remain the Brand’s sole property, licensed to the Influencer only to perform
+      under this Agreement.</li>
+
+      <li><b>Independent Contractor.</b> The Influencer is an independent contractor, not an employee, agent, or partner of the
+      Brand, and is responsible for all taxes on compensation or products received.</li>
+
+      <li><b>Confidentiality.</b> The Influencer will keep confidential all non-public information disclosed by the Brand,
+      including product details, campaign plans, and the terms of this Agreement.</li>
+
+      <li><b>Term &amp; Termination.</b> This Agreement begins on the Effective Date and continues until the Deliverables and
+      Campaign Period are complete. Either Party may terminate for the other’s material breach not cured within
+      <span class="val">${cure}</span> days of written notice. The License, IP Warranty, Confidentiality, and Indemnification
+      sections survive termination.</li>
+
+      <li><b>Indemnification.</b> The Influencer will indemnify and hold the Brand harmless from claims, damages, and reasonable
+      costs arising out of the Influencer’s breach, content, conduct, or failure to comply with FTC or platform requirements.</li>
+
+      <li><b>Governing Law.</b> This Agreement is governed by the laws of the State of New Hampshire. The Parties consent to the
+      exclusive jurisdiction of the state and federal courts in Hillsborough County, New Hampshire.</li>
+
+      <li><b>Entire Agreement.</b> This is the entire agreement between the Parties, superseding prior discussions, and may be
+      amended only in a writing signed by both Parties. It may be signed in counterparts, including by electronic signature.</li>
+    </ol>
+
+    <h3>Signatures</h3>
+    <div class="sigrow">
+      <div class="sig">
+        <div style="font-weight:700;margin-bottom:8px">Inherit, LLC</div>
+        <div class="sigline"></div><div class="sigcap">Signature</div>
+        <div class="sigline" style="margin-top:14px"></div><div class="sigcap">Name / Title</div>
+        <div class="sigline" style="margin-top:14px"></div><div class="sigcap">Date</div>
+      </div>
+      <div class="sig">
+        <div style="font-weight:700;margin-bottom:8px">Influencer${v('infName')?' — '+esc(v('infName')):''}</div>
+        <div class="sigline"></div><div class="sigcap">Signature</div>
+        <div class="sigline" style="margin-top:14px"></div><div class="sigcap">Name / Title</div>
+        <div class="sigline" style="margin-top:14px"></div><div class="sigcap">Date</div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:18px">Template for Inherit, LLC. Have counsel review before use at scale.</p>
+  `;
+}
+
+function fmtDate(d){
+  if(!d) return '';
+  const [y,m,day]=d.split('-');
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return months[+m-1]+' '+(+day)+', '+y;
+}
+
+function copyText(){
+  const t=document.getElementById('contract').innerText;
+  navigator.clipboard.writeText(t).then(()=>{
+    const b=event.target;const o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1400);
+  });
+}
+
+// toggles
+document.querySelectorAll('#typeSeg button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#typeSeg button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  CTYPE=b.dataset.type;
+  show('paidFields',CTYPE==='paid');
+  show('giftedFields',CTYPE==='gifted');
+  render();
+}));
+document.getElementById('usage').addEventListener('change',e=>{show('usageMonthsWrap',e.target.value==='timebox');render()});
+document.getElementById('exclusivity').addEventListener('change',e=>{show('exNamedWrap',e.target.value==='named');render()});
+document.getElementById('ownership').addEventListener('change',e=>{show('returnDaysWrap',e.target.value==='return');render()});
+
+// re-render on any input
+document.querySelectorAll('input,select,textarea').forEach(el=>{
+  el.addEventListener('input',render);el.addEventListener('change',render);
+});
+render();
+</script>
+</body>
+</html>
