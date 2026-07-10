@@ -6,17 +6,19 @@
 <title>Inherit — Influencer Contract Generator</title>
 <style>
   :root{
-    --navy:#1f3864; --navy2:#2e4a7a; --bg:#f4f6fa; --card:#ffffff;
-    --border:#d9dfea; --muted:#7a8199; --accent:#3a5bd9; --accent-soft:#eaefff;
-    --text:#1c2333;
+    /* Inherit brand palette — beige #dbd2be + black */
+    --navy:#111111; --navy2:#3a352b; --bg:#e7e0d0; --card:#ffffff;
+    --border:#cec5b0; --muted:#8a8272; --accent:#111111; --accent-soft:#e0d7c2;
+    --text:#1c1a15; --beige:#dbd2be; --val:#6b5533;
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     background:var(--bg);color:var(--text);line-height:1.5}
-  header.appbar{background:var(--navy);color:#fff;padding:16px 24px;display:flex;align-items:center;
-    justify-content:space-between;flex-wrap:wrap;gap:12px}
+  header.appbar{background:var(--beige);color:#111;padding:14px 24px;display:flex;align-items:center;
+    justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--border)}
+  header.appbar .logo{height:40px;width:auto;display:block}
   header.appbar h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
-  header.appbar .sub{font-size:12px;color:#b9c4de}
+  header.appbar .sub{font-size:12px;color:#4a4436}
   .layout{display:grid;grid-template-columns:minmax(340px,420px) 1fr;gap:0;align-items:start}
   @media(max-width:900px){.layout{grid-template-columns:1fr}}
   .panel{padding:20px 24px;max-height:calc(100vh - 58px);overflow:auto}
@@ -41,14 +43,25 @@
   .chk label{display:flex;align-items:center;gap:6px;font-size:13px;background:#fff;border:1px solid var(--border);
     padding:6px 10px;border-radius:20px;cursor:pointer}
   .chk input{accent-color:var(--accent)}
+  .quickadd{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+  .quickadd button{font-size:11.5px;border:1px dashed var(--border);background:#fff;color:var(--navy2);
+    padding:4px 10px;border-radius:14px;cursor:pointer;font-family:inherit}
+  .quickadd button::before{content:"+ ";font-weight:700}
+  .quickadd button.on{background:var(--accent-soft);border-style:solid;border-color:var(--accent);color:var(--navy)}
+  .quickadd button.on::before{content:"✓ "}
+  .quickadd .qhint{font-size:11px;color:var(--muted);width:100%;margin-bottom:1px}
+  .daterange{display:flex;align-items:center;gap:8px}
+  .daterange input{flex:1;min-width:0}
+  .daterange span{font-size:12px;color:var(--muted)}
   .actions{display:flex;gap:10px;position:sticky;bottom:0;background:var(--card);padding:14px 0 6px;margin-top:6px}
   .btn{flex:1;border:0;border-radius:9px;padding:11px;font-size:14px;font-weight:700;cursor:pointer}
   .btn-primary{background:var(--accent);color:#fff}
-  .btn-ghost{background:#eef1f7;color:var(--navy)}
+  .btn-ghost{background:var(--accent-soft);color:var(--navy)}
   .hint{font-size:11px;color:var(--muted);margin:-6px 0 12px}
   /* preview / contract */
   .paper{background:#fff;max-width:760px;margin:0 auto;padding:56px 64px;border-radius:6px;
     box-shadow:0 3px 18px rgba(20,30,60,.10);font-size:13.5px;color:#1c2333}
+  .paper .brandmark{display:block;width:240px;max-width:70%;height:auto;margin:0 auto 16px}
   .paper h2.title{text-align:center;color:var(--navy);font-size:22px;margin:0 0 2px}
   .paper .ptype{text-align:center;color:var(--muted);font-weight:700;font-size:12px;letter-spacing:1px;
     text-transform:uppercase;margin:0 0 22px}
@@ -57,16 +70,18 @@
   .paper ol li{margin:0 0 11px}
   .paper ol li b{color:#1c2333}
   .paper p{margin:0 0 11px}
-  .val{color:#12408a;font-weight:600}
+  .val{color:var(--val);font-weight:600}
   .val.empty{color:#b03a5b;font-weight:600;font-style:italic}
   table.ex{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:12.5px}
-  table.ex td{border:1px solid #cfd6e6;padding:7px 9px;vertical-align:top}
-  table.ex td.k{background:#eef2fb;font-weight:600;width:38%;color:#26324d}
+  table.ex td{border:1px solid var(--border);padding:7px 9px;vertical-align:top}
+  table.ex td.k{background:var(--accent-soft);font-weight:600;width:38%;color:var(--navy)}
   .sigrow{display:flex;gap:40px;margin-top:14px;flex-wrap:wrap}
   .sigrow .sig{flex:1;min-width:220px}
   .sigline{border-bottom:1px solid #333;height:26px;margin-bottom:3px}
   .sigcap{font-size:11px;color:var(--muted)}
   .note{font-size:11px;color:var(--muted);font-style:italic}
+  .exhibit{margin-top:34px}
+  .exhibit h3{margin-top:0}
   @media print{
     body{background:#fff}
     header.appbar,.form-panel,.actions,.no-print{display:none!important}
@@ -76,14 +91,20 @@
     .paper{box-shadow:none;max-width:none;margin:0;padding:0;border-radius:0}
     .paper h3{page-break-after:avoid}
     .paper ol li,table.ex tr{page-break-inside:avoid}
+    .exhibit{page-break-before:always;margin-top:0}
     @page{size:letter;margin:0.9in}
   }
 </style>
 </head>
 <body>
 <header class="appbar">
-  <div><h1>Inherit — Influencer Contract Generator</h1>
-    <div class="sub">Inherit, LLC · pick the terms, preview updates live, then Save as PDF</div></div>
+  <div>
+    <svg class="logo" viewBox="0 0 640 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Inherit — worn, reworn, remembered">
+      <text x="320" y="86" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="104" letter-spacing="6" fill="#111">INHERIT</text>
+      <text x="320" y="128" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="27" letter-spacing="3" fill="#111">worn &#8226; reworn &#8226; remembered</text>
+    </svg>
+    <div class="sub" style="margin-top:2px">Influencer Contract Generator · pick the terms, preview updates live, then Save as PDF</div>
+  </div>
   <div class="sub no-print">Governing law: New Hampshire</div>
 </header>
 
@@ -97,7 +118,6 @@
 
     <fieldset>
       <legend>Parties</legend>
-      <label class="f"><span class="lab">Inherit, LLC address</span><input type="text" id="coAddr" placeholder="Street, City, ST ZIP"></label>
       <label class="f"><span class="lab">Effective date</span><input type="date" id="effDate"></label>
       <label class="f"><span class="lab">Influencer legal name</span><input type="text" id="infName" placeholder="Jane Doe"></label>
       <label class="f"><span class="lab">Influencer handle</span><input type="text" id="infHandle" placeholder="@janedoe"></label>
@@ -120,23 +140,46 @@
       <label class="f"><span class="lab">Deliverables (quantity &amp; format)</span>
         <textarea id="deliverables" placeholder="2 Instagram Reels + 3 Stories + 1 TikTok"></textarea></label>
       <label class="f"><span class="lab">Minimum length / duration</span>
-        <input type="text" id="minLen" placeholder="Reels ≥ 20 sec; Stories ≥ 3 frames"></label>
+        <input type="text" id="minLen" placeholder="Reels ≥ 20 sec; Stories ≥ 3 frames">
+        <div class="quickadd" data-target="minLen">
+          <span class="qhint">Quick-add (click to toggle) — or type your own above:</span>
+          <button type="button">Reels ≥ 15 sec</button>
+          <button type="button">Reels ≥ 20 sec</button>
+          <button type="button">Reels ≥ 30 sec</button>
+          <button type="button">Stories ≥ 3 frames</button>
+          <button type="button">TikTok ≥ 15 sec</button>
+          <button type="button">TikTok ≥ 30 sec</button>
+          <button type="button">YouTube ≥ 60 sec</button>
+        </div></label>
       <label class="f"><span class="lab">Required @-handles to tag</span>
-        <input type="text" id="tagHandles" value="@inherit, @apparelimpact"></label>
+        <input type="text" id="tagHandles" value="@inherit.vintage">
+        <div class="quickadd" data-target="tagHandles" data-sep=",">
+          <span class="qhint">Quick-add our handles (click to toggle):</span>
+          <button type="button" data-add="@inherit.vintage">IG / TikTok: @inherit.vintage</button>
+          <button type="button" data-add="@inheritvintage">Facebook: @inheritvintage</button>
+        </div></label>
       <label class="f"><span class="lab">Required hashtags / campaign tags</span>
         <input type="text" id="hashtags" placeholder="#ad #Inherit #InheritPartner"></label>
       <label class="f"><span class="lab">Required link / CTA</span>
         <input type="text" id="cta" placeholder="link in bio to inherit.com/fall"></label>
       <label class="f"><span class="lab">Caption / messaging requirements</span>
-        <textarea id="caption" placeholder="Mention the resale & textile-recovery mission; no competitor tags"></textarea></label>
+        <textarea id="caption" placeholder="Mention the resale mission; no competitor tags"></textarea></label>
     </fieldset>
 
     <fieldset>
       <legend>Timing &amp; approvals</legend>
       <label class="f"><span class="lab">Posting window / dates</span>
-        <input type="text" id="postWindow" placeholder="Publish between Sep 1 and Sep 30, 2026"></label>
+        <div class="daterange">
+          <input type="date" id="postStart" aria-label="Posting window start">
+          <span>to</span>
+          <input type="date" id="postEnd" aria-label="Posting window end">
+        </div></label>
       <label class="f"><span class="lab">Campaign period</span>
-        <input type="text" id="campPeriod" placeholder="Sep 1 – Oct 15, 2026"></label>
+        <div class="daterange">
+          <input type="date" id="campStart" aria-label="Campaign period start">
+          <span>to</span>
+          <input type="date" id="campEnd" aria-label="Campaign period end">
+        </div></label>
       <label class="f"><span class="lab">Approval lead time (business days before posting)</span>
         <select id="approvalDays">
           <option>2</option><option selected>3</option><option>5</option><option>7</option><option>0 (no pre-approval)</option>
@@ -158,7 +201,7 @@
       <label class="f"><span class="lab">Exclusivity</span>
         <select id="exclusivity">
           <option value="none" selected>None</option>
-          <option value="apparel">No competing apparel / resale / textile brands during campaign</option>
+          <option value="apparel">No competing apparel / resale brands during campaign</option>
           <option value="named">No specific named competitors (list below)</option>
         </select></label>
       <label class="f" id="exNamedWrap" style="display:none"><span class="lab">Named competitors</span>
@@ -237,7 +280,7 @@ function usageText(){
 }
 function exclusivityText(){
   const e=v('exclusivity');
-  if(e==='apparel') return 'During the Campaign Period the Influencer will not create or publish paid or gifted content promoting any competing apparel, clothing-resale, or textile-recycling brand.';
+  if(e==='apparel') return 'During the Campaign Period the Influencer will not create or publish paid or gifted content promoting any competing apparel or clothing-resale brand.';
   if(e==='named'){return 'During the Campaign Period the Influencer will not create or publish paid or gifted content promoting the following competitors: '+val(v('exNamed'),'named competitors')+'.';}
   return 'No exclusivity applies to this engagement; the Influencer may work with other brands.';
 }
@@ -248,6 +291,61 @@ function payText(){
     net30:'in full within 30 days after the final Deliverable is published and verified',
     upfront:'in full on signing of this Agreement'};
   return map[p]||map.net15;
+}
+
+// format a start/end date pair into readable range text
+function rangeText(startId,endId){
+  const s=fmtDate(v(startId)), e=fmtDate(v(endId));
+  if(s&&e) return s+' – '+e;
+  if(s) return 'from '+s;
+  if(e) return 'through '+e;
+  return '';
+}
+
+// short recap versions for the Exhibit A table
+function usageShort(){
+  const u=v('usage');
+  if(u==='organic') return 'Organic repost only (no paid ads)';
+  if(u==='timebox') return 'Full incl. paid ads — '+v('usageMonths')+' months';
+  return 'Full repurposing incl. paid ads (perpetual)';
+}
+function exclusivityShort(){
+  const e=v('exclusivity');
+  if(e==='apparel') return 'No competing apparel / resale brands during Campaign Period';
+  if(e==='named') return v('exNamed') ? 'None with: '+v('exNamed') : '';
+  return 'None';
+}
+function payShort(){
+  return {split:'50% on signing, 50% on completion',net15:'Net-15 after final post verified',
+    net30:'Net-30 after final post verified',upfront:'100% on signing'}[v('paySchedule')]||'';
+}
+function exhibitRows(){
+  const r=[]; const add=(k,val_,ph)=>r.push('<tr><td class="k">'+k+'</td><td>'+val(val_,ph)+'</td></tr>');
+  const infLabel=(v('infName')||'')+(v('infHandle')?' ('+v('infHandle')+')':'');
+  add('Influencer', infLabel.trim(),'influencer');
+  add('Campaign / Product', v('campaign'),'campaign');
+  add('Platforms', platformsText(),'platforms');
+  if(CTYPE==='gifted'){
+    add('Product(s) provided', v('products'),'products');
+    add('Approx. retail value', v('retail')?'$'+v('retail'):'', 'retail value');
+    add('Ownership of Products', v('ownership')==='return'?('Return within '+v('returnDays')+' days'):'Keep (influencer keeps pieces)','ownership');
+  } else {
+    add('Fee', v('fee')?'$'+v('fee'):'', 'fee');
+    add('Payment schedule', payShort(),'payment');
+  }
+  add('Deliverables (qty & format)', v('deliverables'),'deliverables');
+  add('Minimum length / duration', v('minLen'),'min length');
+  if(CTYPE==='gifted') add('Product-display requirement', v('displayReq'),'display requirement');
+  add('Required @-handles', v('tagHandles'),'@-handles');
+  add('Hashtags / campaign tags', v('hashtags'),'hashtags');
+  add('Required link / CTA', v('cta'),'link / CTA');
+  add('Caption / messaging', v('caption'),'caption requirements');
+  add('Posting window / dates', rangeText('postStart','postEnd'),'posting window');
+  add('Campaign Period', rangeText('campStart','campEnd'),'campaign period');
+  add('Approval lead time', v('approvalDays').startsWith('0')?'No pre-approval required':(v('approvalDays')+' business days before posting'),'approval');
+  add('Exclusivity', exclusivityShort(),'exclusivity');
+  add('Content usage rights', usageShort(),'usage');
+  return r.join('');
 }
 
 function render(){
@@ -279,11 +377,15 @@ function render(){
     ? '<li><b>Product Display.</b> '+val(v('displayReq'),'display requirement')+'</li>' : '';
 
   c.innerHTML = `
+    <svg class="brandmark" viewBox="0 0 640 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Inherit">
+      <text x="320" y="86" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="104" letter-spacing="6" fill="#111">INHERIT</text>
+      <text x="320" y="128" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="27" letter-spacing="3" fill="#111">worn &#8226; reworn &#8226; remembered</text>
+    </svg>
     <h2 class="title">${isPaid?'Influencer Services Agreement':'Influencer Gifting Agreement'}</h2>
     <div class="ptype">${isPaid?'Paid Engagement':'Product-in-Kind Engagement'}</div>
 
     <p>This Influencer Agreement (the “Agreement”) is entered into as of ${val(fmtDate(v('effDate')),'effective date')} by and between
-    <b>Inherit, LLC</b>, a limited liability company with its principal place of business at ${val(v('coAddr'),'Inherit, LLC address')}
+    <b>Inherit, LLC</b>, a limited liability company with its principal place of business at 3 Crane Way, Hooksett, NH 03106
     (the “Brand” or “Company”), and
     ${val(v('infName'),'influencer name')} (${val(v('infHandle'),'handle')}), ${val(v('infAddr'),'address')} (the “Influencer”).
     ${isPaid?'The Brand will pay the Influencer the fee below in exchange for the Influencer’s content and promotional services.'
@@ -305,8 +407,8 @@ function render(){
 
       ${displayLI}
 
-      <li><b>Posting Schedule.</b> The Influencer will publish the Deliverables during: ${val(v('postWindow'),'posting window')}.
-      The Campaign Period is ${val(v('campPeriod'),'campaign period')}.</li>
+      <li><b>Posting Schedule.</b> The Influencer will publish the Deliverables during: ${val(rangeText('postStart','postEnd'),'posting window')}.
+      The Campaign Period is ${val(rangeText('campStart','campEnd'),'campaign period')}.</li>
 
       <li><b>FTC Disclosure &amp; Compliance.</b> The Influencer will clearly and conspicuously disclose the material connection
       with the Brand on every Deliverable in accordance with the U.S. FTC Endorsement Guides and platform policies (e.g., “#ad,”
@@ -366,6 +468,12 @@ function render(){
       </div>
     </div>
     <p class="note" style="margin-top:18px">Template for Inherit, LLC. Have counsel review before use at scale.</p>
+
+    <div class="exhibit">
+      <h3>Exhibit A — Campaign Deliverables &amp; Terms</h3>
+      <p class="note" style="margin-top:0;margin-bottom:8px">Summary of the agreed terms for this engagement. In case of conflict, this Exhibit A controls.</p>
+      <table class="ex">${exhibitRows()}</table>
+    </div>
   `;
 }
 
@@ -382,6 +490,35 @@ function copyText(){
     const b=event.target;const o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1400);
   });
 }
+
+// quick-add chips: toggle a value in/out of a text field.
+// Separator defaults to ";"; set data-sep="," on the box for comma-joined fields.
+// Chip inserts data-add if present, otherwise its visible text.
+function partsOf(str,sep){return (str||'').split(sep||';').map(s=>s.trim()).filter(Boolean);}
+function quickToggle(box,valToAdd){
+  const sep=box.dataset.sep||';';
+  const el=document.getElementById(box.dataset.target);
+  let parts=partsOf(el.value,sep);
+  const i=parts.indexOf(valToAdd);
+  if(i>=0) parts.splice(i,1); else parts.push(valToAdd);
+  el.value=parts.join(sep===',' ? ', ' : '; ');
+  syncQuick(); render();
+}
+function syncQuick(){
+  document.querySelectorAll('.quickadd').forEach(box=>{
+    const sep=box.dataset.sep||';';
+    const el=document.getElementById(box.dataset.target);
+    const parts=partsOf(el?el.value:'',sep);
+    box.querySelectorAll('button').forEach(b=>b.classList.toggle('on',parts.includes(b.dataset.add||b.textContent)));
+  });
+}
+document.querySelectorAll('.quickadd button').forEach(b=>{
+  b.addEventListener('click',()=>quickToggle(b.parentElement,b.dataset.add||b.textContent));
+});
+document.querySelectorAll('.quickadd').forEach(box=>{
+  const el=document.getElementById(box.dataset.target);
+  if(el) el.addEventListener('input',syncQuick);
+});
 
 // toggles
 document.querySelectorAll('#typeSeg button').forEach(b=>b.addEventListener('click',()=>{
@@ -400,6 +537,7 @@ document.getElementById('ownership').addEventListener('change',e=>{show('returnD
 document.querySelectorAll('input,select,textarea').forEach(el=>{
   el.addEventListener('input',render);el.addEventListener('change',render);
 });
+syncQuick();
 render();
 </script>
 </body>
