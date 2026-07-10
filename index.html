@@ -91,6 +91,8 @@
     .paper{box-shadow:none;max-width:none;margin:0;padding:0;border-radius:0}
     .paper h3{page-break-after:avoid}
     .paper ol li,table.ex tr{page-break-inside:avoid}
+    .sigrow,.paper .sig{page-break-inside:avoid;break-inside:avoid}
+    .paper h3{page-break-after:avoid;break-after:avoid}
     .exhibit{page-break-before:always;margin-top:0}
     @page{size:letter;margin:0.9in}
   }
@@ -334,15 +336,28 @@ function exhibitRows(){
   add('Minimum length / duration', v('minLen'),'min length');
   if(CTYPE==='gifted') add('Product-display requirement', v('displayReq'),'display requirement');
   add('Required @-handles', v('tagHandles'),'@-handles');
-  add('Hashtags / campaign tags', v('hashtags'),'hashtags');
-  add('Required link / CTA', v('cta'),'link / CTA');
-  add('Caption / messaging', v('caption'),'caption requirements');
+  if(v('hashtags')) add('Hashtags / campaign tags', v('hashtags'),'');
+  if(v('cta')) add('Required link / CTA', v('cta'),'');
+  if(v('caption')) add('Caption / messaging', v('caption'),'');
   add('Posting window / dates', rangeText('postStart','postEnd'),'posting window');
   add('Campaign Period', rangeText('campStart','campEnd'),'campaign period');
   add('Approval lead time', v('approvalDays').startsWith('0')?'No pre-approval required':(v('approvalDays')+' business days before posting'),'approval');
   add('Exclusivity', exclusivityShort(),'exclusivity');
   add('Content usage rights', usageShort(),'usage');
   return r.join('');
+}
+
+// optional sentence fragment — only appears if the field is filled
+function optLine(prefix,id){ return v(id) ? ' '+prefix+': <span class="val">'+esc(v(id))+'</span>.' : ''; }
+// Deliverables clause: required parts always show; hashtags / link / caption are optional
+function deliverablesClause(){
+  let s='The Influencer will create and publish: '+val(v('deliverables'),'deliverables')+'.';
+  s+=' Minimum length or duration: '+val(v('minLen'),'min length')+'.';
+  s+=' The Influencer will tag '+val(v('tagHandles'),'@-handles')+'.';
+  s+=optLine('Required hashtags / campaign tags','hashtags');
+  s+=optLine('Required link or call-to-action','cta');
+  s+=optLine('Caption and messaging requirements','caption');
+  return s;
 }
 
 function render(){
@@ -393,11 +408,7 @@ function render(){
 
       ${considerationLI}
 
-      <li><b>Deliverables.</b> The Influencer will create and publish: ${val(v('deliverables'),'deliverables')}.
-      Minimum length / duration: ${val(v('minLen'),'min length')}.
-      The Influencer will tag ${val(v('tagHandles'),'@-handles')} and include the hashtags/campaign tags
-      ${val(v('hashtags'),'hashtags')}. Required link / call-to-action: ${val(v('cta'),'link / CTA')}.
-      Caption &amp; messaging requirements: ${val(v('caption'),'caption requirements')}.</li>
+      <li><b>Deliverables.</b> ${deliverablesClause()}</li>
 
       ${displayLI}
 
